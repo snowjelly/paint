@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>paint.v1</title>
+    <!-- Your Custom Tab Icon -->
+    <link rel="icon" type="image/png" href="ico.png">
+    <style>
+        body {
+            background-color: #cbd9e9;
+            font-family: sans-serif;
+            margin: 20px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        /* Top toolbar layout */
+        .controls {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Pushes the logo to the far right */
+            background: #eaf2fb;
+            padding: 10px;
+            border: 1px solid #abc1de;
+            border-radius: 4px;
+            max-width: 600px;
+            box-sizing: border-box;
+        }
+        /* Left side buttons & colors wrap */
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        /* Tool selection buttons */
+        button {
+            padding: 6px 12px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid #abc1de;
+            background: #fff;
+            border-radius: 3px;
+        }
+        button:hover {
+            background: #ffdf9e;
+            border-color: #e4a53a;
+        }
+        button.active {
+            background: #fec261;
+            border-color: #db8a11;
+        }
+        /* Color selection panel */
+        .palette {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 3px;
+        }
+        .color-box {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #7a94b8;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+        .color-box:hover {
+            transform: scale(1.1);
+        }
+        /* Custom Logo Styling */
+        .app-logo {
+            height: 32px; /* Keeps the logo neat and fitting inside the toolbar */
+            object-fit: contain;
+        }
+        /* The Canvas sheet */
+        canvas {
+            background-color: white;
+            border: 3px solid #3c4754;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+            cursor: crosshair;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <div class="toolbar-left">
+            <!-- Tools -->
+            <button id="btn-brush" class="active" onclick="setTool('brush')">🖌️ Brush</button>
+            <button id="btn-eraser" onclick="setTool('eraser')">🧽 Eraser</button>
+            <button onclick="clearCanvas()" style="margin-right: 10px;">🗑️ Clear</button>
+
+            <!-- Colors Grid -->
+            <div class="palette">
+                <div class="color-box" style="background: #000000;" onclick="setColor('#000000')"></div>
+                <div class="color-box" style="background: #7f7f7f;" onclick="setColor('#7f7f7f')"></div>
+                <div class="color-box" style="background: #ed1c24;" onclick="setColor('#ed1c24')"></div>
+                <div class="color-box" style="background: #fff200;" onclick="setColor('#fff200')"></div>
+                <div class="color-box" style="background: #22b14c;" onclick="setColor('#22b14c')"></div>
+                <div class="color-box" style="background: #00a2e8;" onclick="setColor('#00a2e8')"></div>
+                <div class="color-box" style="background: #ffffff;" onclick="setColor('#ffffff')"></div>
+                <div class="color-box" style="background: #c3c3c3;" onclick="setColor('#c3c3c3')"></div>
+                <div class="color-box" style="background: #ffaec9;" onclick="setColor('#ffaec9')"></div>
+                <div class="color-box" style="background: #b5e61d;" onclick="setColor('#b5e61d')"></div>
+                <div class="color-box" style="background: #3f48cc;" onclick="setColor('#3f48cc')"></div>
+                <div class="color-box" style="background: #a349a4;" onclick="setColor('#a349a4')"></div>
+            </div>
+        </div>
+
+        <!-- Custom Logo Image -->
+        <img class="app-logo" src="cooltext518018176838655.png" alt="paint.v1 logo">
+    </div>
+
+    <!-- The Drawing Field -->
+    <canvas id="paintCanvas" width="600" height="400"></canvas>
+
+<script>
+    const canvas = document.getElementById('paintCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let isDrawing = false;
+    let tool = 'brush';
+    let currentColor = '#000000';
+
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 6;
+
+    function setTool(newTool) {
+        tool = newTool;
+        document.getElementById('btn-brush').classList.remove('active');
+        document.getElementById('btn-eraser').classList.remove('active');
+        
+        if (tool === 'brush') {
+            document.getElementById('btn-brush').classList.add('active');
+        } else {
+            document.getElementById('btn-eraser').classList.add('active');
+        }
+    }
+
+    function setColor(newColor) {
+        currentColor = newColor;
+        setTool('brush');
+    }
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    canvas.onmousedown = function(e) {
+        isDrawing = true;
+        ctx.beginPath();
+        const rect = canvas.getBoundingClientRect();
+        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    };
+
+    canvas.onmousemove = function(e) {
+        if (!isDrawing) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        ctx.lineTo(x, y);
+
+        if (tool === 'brush') {
+            ctx.strokeStyle = currentColor;
+        } else {
+            ctx.strokeStyle = '#FFFFFF';
+        }
+
+        ctx.stroke();
+    };
+
+    window.onmouseup = function() {
+        isDrawing = false;
+        ctx.closePath();
+    };
+</script>
+
+</body>
+</html>
+
