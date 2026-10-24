@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>paint.v1</title>
+    <title>paint2007</title>
     <!-- Your Custom Tab Icon -->
     <link rel="icon" type="image/png" href="ico.png">
     <style>
@@ -23,23 +23,30 @@
             padding: 10px;
             border: 1px solid #abc1de;
             border-radius: 4px;
-            max-width: 600px;
+            max-width: 650px;
             box-sizing: border-box;
         }
-        /* Left side buttons & colors wrap */
+        /* Left side buttons, slider & colors wrap */
         .toolbar-left {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
+        }
+        /* Sub-groups inside the toolbar */
+        .tool-section {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         /* Tool selection buttons */
         button {
-            padding: 6px 12px;
+            padding: 6px 10px;
             font-weight: bold;
             cursor: pointer;
             border: 1px solid #abc1de;
             background: #fff;
             border-radius: 3px;
+            font-size: 12px;
         }
         button:hover {
             background: #ffdf9e;
@@ -48,6 +55,20 @@
         button.active {
             background: #fec261;
             border-color: #db8a11;
+        }
+        /* Brush Size Controller Section */
+        .size-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 10px;
+            color: #1e395b;
+            font-weight: bold;
+            gap: 2px;
+        }
+        .size-panel input {
+            cursor: pointer;
+            width: 70px;
         }
         /* Color selection panel */
         .palette {
@@ -67,8 +88,9 @@
         }
         /* Custom Logo Styling */
         .app-logo {
-            height: 32px; /* Keeps the logo neat and fitting inside the toolbar */
+            height: 32px;
             object-fit: contain;
+            margin-left: 10px;
         }
         /* The Canvas sheet */
         canvas {
@@ -84,10 +106,20 @@
 
     <div class="controls">
         <div class="toolbar-left">
-            <!-- Tools -->
-            <button id="btn-brush" class="active" onclick="setTool('brush')">🖌️ Brush</button>
-            <button id="btn-eraser" onclick="setTool('eraser')">🧽 Eraser</button>
-            <button onclick="clearCanvas()" style="margin-right: 10px;">🗑️ Clear</button>
+            <!-- Tools Group -->
+            <div class="tool-section">
+                <button id="btn-brush" class="active" onclick="setTool('brush')">🖌️ Brush</button>
+                <button id="btn-bucket" onclick="setTool('bucket')">🪣 Bucket</button>
+                <button id="btn-text" onclick="setTool('text')">💬 Text</button>
+                <button id="btn-eraser" onclick="setTool('eraser')">🧽 Eraser</button>
+                <button onclick="clearCanvas()">🗑️ Clear</button>
+            </div>
+
+            <!-- Size Controller -->
+            <div class="size-panel">
+                <span id="size-label">Size: 6px</span>
+                <input type="range" id="brush-size" min="1" max="40" value="6" oninput="updateWidth(this.value)">
+            </div>
 
             <!-- Colors Grid -->
             <div class="palette">
@@ -106,8 +138,8 @@
             </div>
         </div>
 
-        <!-- Custom Logo Image -->
-        <img class="app-logo" src="cooltext518018176838655.png" alt="paint.v1 logo">
+        <!-- Your New PAINT2007 Logo Image -->
+        <img class="app-logo" src="image_J3Wm-r.png" alt="paint2007 logo">
     </div>
 
     <!-- The Drawing Field -->
@@ -120,63 +152,147 @@
     let isDrawing = false;
     let tool = 'brush';
     let currentColor = '#000000';
+    let currentWidth = 6;
 
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.lineWidth = 6;
+    ctx.lineWidth = currentWidth;
+
+    // Force an initial white background fill so the bucket engine can scan baseline pixels properly
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     function setTool(newTool) {
         tool = newTool;
         document.getElementById('btn-brush').classList.remove('active');
+        document.getElementById('btn-bucket').classList.remove('active');
+        document.getElementById('btn-text').classList.remove('active');
         document.getElementById('btn-eraser').classList.remove('active');
         
         if (tool === 'brush') {
             document.getElementById('btn-brush').classList.add('active');
-        } else {
+        } else if (tool === 'bucket') {
+            document.getElementById('btn-bucket').classList.add('active');
+        } else if (tool === 'text') {
+            document.getElementById('btn-text').classList.add('active');
+        } else if (tool === 'eraser') {
             document.getElementById('btn-eraser').classList.add('active');
         }
     }
 
     function setColor(newColor) {
         currentColor = newColor;
-        setTool('brush');
+        if (tool !== 'bucket' && tool !== 'text') {
+            setTool('brush');
+        }
+    }
+
+    function updateWidth(newSize) {
+        currentWidth = parseInt(newSize);
+        document.getElementById('size-label').innerText = `Size: ${currentWidth}px`;
     }
 
     function clearCanvas() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function hexToRgba(hex) {
+        let c = hex.substring(1);
+        let r = parseInt(c.substring(0, 2), 16);
+        let g = parseInt(c.substring(2, 4), 16);
+        let b = parseInt(c.substring(4, 6), 16);
+        return [r, g, b, 255];
+    }
+
+    function floodFill(startX, startY, fillHex) {
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imgData.data;
+        
+        const targetColor = getPixelColor(startX, startY, data);
+        const fillColor = hexToRgba(fillHex);
+
+        if (colorsMatch(targetColor, fillColor)) return;
+
+        const queue = [[startX, startY]];
+
+        while (queue.length > 0) {
+            const [x, y] = queue.shift();
+            const currentIdx = (y * canvas.width + x) * 4;
+            const currentColor = [data[currentIdx], data[currentIdx+1], data[currentIdx+2], data[currentIdx+3]];
+
+            if (colorsMatch(currentColor, targetColor)) {
+                data[currentIdx] = fillColor[0];
+                data[currentIdx+1] = fillColor[1];
+                data[currentIdx+2] = fillColor[2];
+                data[currentIdx+3] = fillColor[3];
+
+                if (x > 0) queue.push([x - 1, y]);
+                if (x < canvas.width - 1) queue.push([x + 1, y]);
+                if (y > 0) queue.push([x, y - 1]);
+                if (y < canvas.height - 1) queue.push([x, y + 1]);
+            }
+        }
+        ctx.putImageData(imgData, 0, 0);
+    }
+
+    function getPixelColor(x, y, data) {
+        const idx = (y * canvas.width + x) * 4;
+        return [data[idx], data[idx+1], data[idx+2], data[idx+3]];
+    }
+
+    function colorsMatch(c1, c2) {
+        // FIXED: Checks Red, Green, and Blue arrays explicitly to avoid channel mismatching
+        return Math.abs(c1[0] - c2[0]) < 25 &&
+               Math.abs(c1[1] - c2[1]) < 25 &&
+               Math.abs(c1[2] - c2[2]) < 25;
     }
 
     canvas.onmousedown = function(e) {
-        isDrawing = true;
-        ctx.beginPath();
         const rect = canvas.getBoundingClientRect();
-        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        const startX = Math.floor(e.clientX - rect.left);
+        const startY = Math.floor(e.clientY - rect.top);
+
+        if (tool === 'bucket') {
+            floodFill(startX, startY, currentColor);
+        } else if (tool === 'text') {
+            const userText = prompt("Enter text to stamp on canvas:");
+            if (userText) {
+                ctx.fillStyle = currentColor;
+                const fontSize = currentWidth < 12 ? 16 : currentWidth * 1.5;
+                ctx.font = `bold ${fontSize}px sans-serif`;
+                ctx.textBaseline = "middle";
+                ctx.fillText(userText, startX, startY);
+            }
+        } else {
+            isDrawing = true;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+        }
     };
 
     canvas.onmousemove = function(e) {
         if (!isDrawing) return;
 
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const rect = canvas.getBoundingClientRect();const x = e.clientX - rect.left;
+const y = e.clientY - rect.top;
+ctx.lineTo(x, y);
+if (tool === 'brush') {
+ctx.strokeStyle = currentColor;
+ctx.lineWidth = currentWidth;
+} else if (tool === 'eraser') {
+ctx.strokeStyle = '#FFFFFF';
+ctx.lineWidth = currentWidth * 2;
+}
+ctx.stroke();
+};
+window.onmouseup = function() {
+isDrawing = false;
+ctx.closePath();
+};
 
-        ctx.lineTo(x, y);
 
-        if (tool === 'brush') {
-            ctx.strokeStyle = currentColor;
-        } else {
-            ctx.strokeStyle = '#FFFFFF';
-        }
-
-        ctx.stroke();
-    };
-
-    window.onmouseup = function() {
-        isDrawing = false;
-        ctx.closePath();
-    };
 </script>
 
 </body>
 </html>
-
