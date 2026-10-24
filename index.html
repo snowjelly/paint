@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>snowjelly apps - homepage</title>
+    <!-- Your Custom Icon -->
+    <link rel="icon" type="image/png" href="ico.png">
+    <style>
+        body {
+            background-color: #cbd9e9;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* 2007 Glossy Window Container */
+        .homepage-container {
+            border: 1px solid #6f809b;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+            background: #eaf2fb;
+            border-radius: 6px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 700px;
+            box-sizing: border-box;
+        }
+
+        /* Header Title Bar */
+        .header-bar {
+            background: linear-gradient(to bottom, #b9cfe9 0%, #82a8d3 50%, #5887be 51%, #6e9bc9 100%);
+            padding: 15px;
+            border-bottom: 1px solid #4b6a93;
+            text-align: center;
+        }
+
+        /* Large Title Image/Text Styling */
+        .main-title-logo {
+            max-height: 55px;
+            object-fit: contain;
+        }
+
+        .subtitle {
+            color: #1e395b;
+            font-weight: bold;
+            margin: 15px 0 5px 0;
+            font-size: 14px;
+            text-align: center;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+        }
+
+        /* Product Catalog Grid Layout */
+        .app-grid {
+            padding: 25px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        /* Software Product Card Box */
+        .app-card {
+            background: #ffffff;
+            border: 1px solid #abc1de;
+            border-radius: 4px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 1px 1px 5px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .app-card:hover {
+            border-color: #e4a53a;
+            box-shadow: 0 0 8px rgba(228, 165, 58, 0.3);
+        }
+
+        .app-card h2 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            color: #1e395b;
+        }
+
+        .app-card p {
+            margin: 0 0 15px 0;
+            font-size: 13px;
+            color: #4c688e;
+            line-height: 1.4;
+        }
+
+        /* 2007 Windows Aero Style Launch Button */
+        .launch-btn {
+            display: inline-block;
+            text-decoration: none;
+            background: linear-gradient(to bottom, #ffffff, #eaeaea);
+            border: 1px solid #abc1de;
+            border-radius: 3px;
+            padding: 8px 16px;
+            color: #1e395b;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+        .launch-btn:hover {
+            background: linear-gradient(to bottom, #fff6e0, #ffdf9e);
+            border-color: #e4a53a;
+        }
+        .launch-btn:active {
+            background: linear-gradient(to bottom, #ffdf9e, #fec261);
+            border-color: #db8a11;
+        }
+
+        /* Bottom Status Footer */
+        .footer-bar {
+            background: linear-gradient(to bottom, #e2ecf7, #cbdbe0);
+            border-top: 1px solid #99a8bc;
+            padding: 8px 15px;
+            color: #4c688e;
+            font-size: 11px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="homepage-container">
+        <!-- Brand Header Section -->
+        <div class="header-bar">
+            <!-- Uses your awesome rainbow paint2007 text as the main suite banner -->
+            <img class="main-title-logo" src="image_J3Wm-r.png" alt="paint2007 banner">
+        </div>
+
+        <div class="subtitle">Welcome to the official snowjelly app distribution hub. Select a version to launch:</div>
+
+        <!-- Software Selection Grid -->
+        <div class="app-grid">
+            
+            <!-- Product Card 1: paint.v1 -->
+            <div class="app-card">
+                <div>
+                    <h2>paint.v1</h2>
+                    <p>The original, hyper-lightweight drawing engine release. Simple, fast, and fully stable—even on legacy browsers like Internet Explorer!</p>
+                </div>
+                <!-- Points to your paint.v1 file -->
+                <a href="paintv1.html" class="launch-btn">🚀 Launch v1</a>
+            </div>
+
+            <!-- Product Card 2: paint2007 -->
+            <div class="app-card">
+                <div>
+                    <h2>paint2007</h2>
+                    <p>The premium next-gen upgrade suite. Features a dynamic flood fill bucket tool, adjustable line size controllers, and vector text stamp processing.</p>
+                </div>
+                <!-- Points to your paint2007 file -->
+                <a href="paint2.html" class="launch-btn">🌟 Launch paint2007</a>
+            </div>
+
+        </div>
+
+        <!-- Footer Info Block -->
+        <div class="footer-bar">
+            © 2026 snowjelly studios. Built with native HTML5 Canvas and Vanilla JavaScript.
+        </div>
+    </div>
+
+</body>
+</html>
